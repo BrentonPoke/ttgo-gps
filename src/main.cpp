@@ -76,13 +76,11 @@ String getGPSData() {
     ems["G"] = gender;
     ems["Geo"]["lat"] =tgps.location.lat() ;
     ems["Geo"]["lon"] = tgps.location.lng();
-    ems["Needs"]["M"] = (rand() % 3) + 1;
-    ems["Needs"]["F"] = (rand() % 3) + 1;
-    ems["Needs"]["W"] = (rand() % 3) + 1;
-    std::srand(time(NULL));
-    ems["Needs"]["D"]["P"] = disabled[rand()%2];
-    std::srand(time(NULL));
-    ems["Needs"]["D"]["M"] = disabled[rand()%2];
+    ems["Needs"]["M"] = (esp_random() % 3) + 1;
+    ems["Needs"]["F"] = (esp_random() % 3) + 1;
+    ems["Needs"]["W"] = (esp_random() % 3) + 1;
+    ems["Needs"]["D"]["P"] = disabled[esp_random()%2];
+    ems["Needs"]["D"]["M"] = disabled[esp_random()%2];
 
     String jsonstat;
     serializeJson(ems,jsonstat);
