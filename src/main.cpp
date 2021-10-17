@@ -64,7 +64,7 @@ String getGPSData() {
     //test of EMS ideas...
 
     std::string arr[3] = {"NB","M","W"};
-    std::string disabled[2] = {"true","false"};
+    bool disabled[2] = {true,false};
     std::string gender = arr[rand()%(3)];
 
     DynamicJsonDocument nestdoc(200);
@@ -72,15 +72,17 @@ String getGPSData() {
     ems.createNestedObject("Geo");
     //JsonObject needs = ems.createNestedObject("Needs");
     //needs.createNestedObject("D");
+    std::srand(time(NULL));
     ems["G"] = gender;
     ems["Geo"]["lat"] =tgps.location.lat() ;
     ems["Geo"]["lon"] = tgps.location.lng();
-    ems["Needs"]["M"] = 2;
-    ems["Needs"]["F"] = 1;
-    ems["Needs"]["W"] = 3;
+    ems["Needs"]["M"] = (rand() % 3) + 1;
+    ems["Needs"]["F"] = (rand() % 3) + 1;
+    ems["Needs"]["W"] = (rand() % 3) + 1;
     std::srand(time(NULL));
-    ems["Needs"]["D"]["P"] = false;
-    ems["Needs"]["D"]["M"] = true;
+    ems["Needs"]["D"]["P"] = disabled[rand()%2];
+    std::srand(time(NULL));
+    ems["Needs"]["D"]["M"] = disabled[rand()%2];
 
     String jsonstat;
     serializeJson(ems,jsonstat);
@@ -97,7 +99,6 @@ String getGPSData() {
 }
 
 bool runSensor(void *) {
-    bool result;
     String sensorVal = getGPSData();
 
     Serial.print("[MAMA] sensor data: ");
