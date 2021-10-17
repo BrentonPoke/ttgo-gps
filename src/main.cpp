@@ -72,9 +72,8 @@ String getGPSData() {
     ems.createNestedObject("Geo");
     //JsonObject needs = ems.createNestedObject("Needs");
     //needs.createNestedObject("D");
-    std::srand(time(NULL));
     ems["G"] = gender;
-    ems["Geo"]["lat"] =tgps.location.lat() ;
+    ems["Geo"]["lat"] = tgps.location.lat();
     ems["Geo"]["lon"] = tgps.location.lng();
     ems["Needs"]["M"] = (esp_random() % 3) + 1;
     ems["Needs"]["F"] = (esp_random() % 3) + 1;
