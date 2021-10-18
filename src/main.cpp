@@ -16,7 +16,6 @@ TinyGPSPlus tgps;
 HardwareSerial GPS(1);
 AXP20X_Class axp;
 
-
 MamaDuck duck;
 
 auto timer = timer_create_default();
@@ -69,12 +68,11 @@ String getGPSData() {
 
     DynamicJsonDocument nestdoc(200);
     JsonObject ems  = nestdoc.createNestedObject("EMS");
-    ems.createNestedObject("Geo");
     //JsonObject needs = ems.createNestedObject("Needs");
     //needs.createNestedObject("D");
     ems["G"] = gender;
-    ems["Geo"]["lat"] = tgps.location.lat();
-    ems["Geo"]["lon"] = tgps.location.lng();
+    ems["lat"] = tgps.location.lat();
+    ems["lon"] = tgps.location.lng();
     ems["Needs"]["M"] = (esp_random() % 3) + 1;
     ems["Needs"]["F"] = (esp_random() % 3) + 1;
     ems["Needs"]["W"] = (esp_random() % 3) + 1;
