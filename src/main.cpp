@@ -104,7 +104,7 @@ String getGPSData() {
     DynamicJsonDocument nestdoc(229);
     JsonObject ems  = nestdoc.createNestedObject("EMS");
 
-    ems["G"] = arr[rand()%(3)];
+    ems["G"] = arr[esp_random() % 3];
     ems["lat"] = tgps.location.lat();
     ems["lon"] = tgps.location.lng();
     //ems["batt"]["BatteryVoltage"] = BL.getBatteryVolts();
