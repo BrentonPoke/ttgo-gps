@@ -3,7 +3,7 @@
 #include <MamaDuck.h>
 #include <Arduino.h>
 #include <unishox2.h>
-#include <TimeLib.h>
+#include <ctime>
 
 #ifdef SERIAL_PORT_USBVIRTUAL
 #define Serial SERIAL_PORT_USBVIRTUAL
@@ -41,16 +41,17 @@ static void smartDelay(unsigned long ms)
     } while (millis() - start < ms);
 }
 
-time_t tmConvert_t(int YYYY, byte MM, byte DD, byte hh, byte mm, byte ss)
+std::time_t tmConvert_t(int YYYY, int MM, byte DD, byte hh, byte mm, byte ss)
 {
-    tmElements_t tmSet;
-    tmSet.Year = YYYY - 1970;
-    tmSet.Month = MM;
-    tmSet.Day = DD;
-    tmSet.Hour = hh;
-    tmSet.Minute = mm;
-    tmSet.Second = ss;
-    return makeTime(tmSet);
+    std::tm tmSet{};
+    tmSet.tm_year = YYYY - 1900;
+    tmSet.tm_mon = MM - 1;
+    tmSet.tm_mday = DD;
+    tmSet.tm_hour = hh;
+    tmSet.tm_min = mm;
+    tmSet.tm_sec = ss;
+    std::time_t t = std::mktime(&tmSet);
+    return mktime(std::gmtime(&t));
 }
 
 // Getting GPS data
