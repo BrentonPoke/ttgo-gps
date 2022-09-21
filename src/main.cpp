@@ -119,10 +119,12 @@ String getGPSData() {
 
     Serial.println("Payload: " + jsonstat);
     Serial.print("Payload Size: ");
-    Serial.println(int(jsonstat.length()));
+    Serial.println(jsonstat.length());
 
-    char buff[229];
+    /*
+     char buff[229];
     unishox2_compress_simple(jsonstat.c_str(), int(jsonstat.length()), buff);
+     */
     // Creating a message of the Latitude and Longitude
     // Check to see if GPS data is being received
     if (millis() > 5000 && tgps.charsProcessed() < 10)
@@ -130,7 +132,7 @@ String getGPSData() {
         Serial.println(F("No GPS data received: check wiring"));
     }
 
-    return buff;
+    return jsonstat;
 }
 
 
