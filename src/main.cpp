@@ -13,6 +13,7 @@
 //GPS
 #include <TinyGPS++.h>
 #include <ArduinoJson.h>
+#include <debug.h>
 
 const int btnPin = 37;
 
@@ -130,6 +131,8 @@ bool runSensor(void *) {
     //make sure there is at least one point generated
     std::pair<double,double> gpsPair = getLocation(tgps.location.lng(),tgps.location.lat(),15);
     auto limit = esp_random()%20+1;
+
+    info("Running GPS loop %d times", limit);
 
     for(int i=0; i < limit; i++) {
         String sensorVal = getGPSData(gpsPair);
