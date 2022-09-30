@@ -107,8 +107,6 @@ String getGPSData() {
     ems["G"] = arr[esp_random() % 3];
     ems["lat"] = tgps.location.lat();
     ems["lon"] = tgps.location.lng();
-    //ems["batt"]["BatteryVoltage"] = BL.getBatteryVolts();
-    //ems["batt"]["Charge"] = 100*((BL.getBatteryVolts() - 3.055)/(4.2-3.055));
     ems["Needs"]["M"] = (esp_random() % 3) + 1;
     ems["Needs"]["F"] = (esp_random() % 3) + 1;
     ems["Needs"]["W"] = (esp_random() % 3) + 1;
@@ -136,62 +134,11 @@ String getGPSData() {
     return jsonstat;
 }
 
-
-// Getting the battery data
-// String getBatteryData() {
-
-//  int isCharging = axp.isChargeing();
-//  boolean isFullyCharged = axp.isChargingDoneIRQ();
-//  float batteryVoltage = axp.getBattVoltage();
-//  float batteryDischarge = axp.getAcinCurrent();
-//  float getTemp = axp.getTemp();
-//  float battPercentage = axp.getBattPercentage();
-
-//  Serial.println("--- Power ---");
-//  Serial.print("Duck charging (1 = Yes): ");
-//  Serial.println(isCharging);
-//  Serial.print("Fully Charged: ");
-//  Serial.println(isFullyCharged);
-//  Serial.print("Battery Voltage: ");
-//  Serial.println(batteryVoltage);
-//  Serial.print("Battery Discharge: ");
-//  Serial.println(batteryDischarge);
-//  Serial.print("Board Temperature: ");
-//  Serial.println(getTemp);
-//  Serial.print("battery Percentage: ");
-//  Serial.println(battPercentage);
-
-//  String sensorVal =
-//          "Charging:" +
-//          String(isCharging) +
-//          " Full:" +
-//          String(isFullyCharged)+
-//          " Volts:" +
-//          String(batteryVoltage) +
-//          " Temp:" +
-//          String(getTemp);
-
-//  return sensorVal;
-//}
-
 bool runSensor(void *) {
     String sensorVal = getGPSData();
 
     Serial.print("[MAMA] sensor data: ");
     Serial.println(sensorVal);
-
-//    getBatteryData();
-
-//    Serial.printf("getBatteryVoltage()          : %7.2f\n", axp192.getBatteryVoltage());
-//    Serial.printf("getBatteryDischargeCurrent() : %7.2f\n", axp192.getBatteryDischargeCurrent());
-//    Serial.printf("getBatteryChargeCurrent()    : %7.2f\n", axp192.getBatteryChargeCurrent());
-//    Serial.printf("getAcinVolatge()             : %7.2f\n", axp192.getAcinVolatge());
-//    Serial.printf("getAcinCurrent()             : %7.2f\n", axp192.getAcinCurrent());
-//    Serial.printf("getVbusVoltage()             : %7.2f\n", axp192.getVbusVoltage());
-//    Serial.printf("getVbusCurrent()             : %7.2f\n", axp192.getVbusCurrent());
-//    Serial.printf("getInternalTemperature()     : %7.2f\n", axp192.getInternalTemperature());
-//    Serial.printf("getApsVoltage()              : %7.2f\n", axp192.getApsVoltage());
-//    Serial.printf("getPekPress()                : %4d\n"  , axp192.getPekPress());
 
     //Send gps data
     duck.sendData(topics::location, sensorVal);
@@ -203,7 +150,7 @@ void setup() {
     // given during the device provisioning then converted to a byte vector to
     // setup the duck NOTE: The Device ID must be exactly 8 bytes otherwise it
     // will get rejected
-    std::string deviceId("MAMAGPS3");
+    std::string deviceId("MAMAGPS2");
     std::vector<byte> devId;
     devId.insert(devId.end(), deviceId.begin(), deviceId.end());
 
@@ -211,33 +158,6 @@ void setup() {
     duck.setupWithDefaults(devId);
     Serial.println("MAMA-DUCK...READY!");
 
-    //Setup APX
-//    Wire.begin(21, 22);
-//    if (!axp.begin(Wire, AXP192_SLAVE_ADDRESS)) {
-//        Serial.println("AXP192 Begin PASS");
-//    } else {
-//        Serial.println("AXP192 Begin FAIL");
-//    }
-//  axp.setPowerOutPut(AXP192_LDO2, AXP202_ON);
-//  axp.setPowerOutPut(AXP192_LDO3, AXP202_ON);
-//  axp.setPowerOutPut(AXP192_DCDC2, AXP202_ON);
-//  axp.setPowerOutPut(AXP192_EXTEN, AXP202_ON);
-//  axp.setPowerOutPut(AXP192_DCDC1, AXP202_ON);
-//    I2C_AXP192_InitDef initDef = {
-//            .EXTEN  = true,
-//            .BACKUP = true,
-//            .DCDC1  = 3300,
-//            .DCDC2  = 0,
-//            .DCDC3  = 0,
-//            .LDO2   = 3000,
-//            .LDO3   = 3000,
-//            .GPIO0  = 2800,
-//            .GPIO1  = -1,
-//            .GPIO2  = -1,
-//            .GPIO3  = -1,
-//            .GPIO4  = -1,
-//    };
-//    axp192.begin(initDef);
 
     pinMode(btnPin, INPUT);
     GPS.begin(9600, SERIAL_8N1, 34, 12);   //17-TX 18-RX
