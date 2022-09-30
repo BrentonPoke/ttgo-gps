@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <unishox2.h>
 #include <ctime>
+#include <coords.h>
 
 #ifdef SERIAL_PORT_USBVIRTUAL
 #define Serial SERIAL_PORT_USBVIRTUAL
@@ -13,17 +14,10 @@
 #include <TinyGPS++.h>
 #include <ArduinoJson.h>
 
-//I2C_AXP192 axp192(I2C_AXP192_DEFAULT_ADDRESS, Wire1);
-
 const int btnPin = 37;
-#define ADC_PIN 34
-#define CONV_FACTOR 1.7
-#define READS 20
 
 TinyGPSPlus tgps;
 HardwareSerial GPS(1);
-//AXP20X_Class axp;
-//Pangodream_18650_CL BL(ADC_PIN, CONV_FACTOR, READS);
 MamaDuck duck;
 
 auto timer = timer_create_default();
@@ -55,10 +49,7 @@ std::time_t tmConvert_t(int YYYY, int MM, byte DD, byte hh, byte mm, byte ss)
 }
 
 // Getting GPS data
-String getGPSData() {
-
-    // Encoding the GPS
-    smartDelay(5000);
+String getGPSData(std::pair<double,double> gpsPair ) {
 
     // Printing the GPS data
     Serial.println("--- GPS ---");
@@ -103,10 +94,9 @@ String getGPSData() {
 
     DynamicJsonDocument nestdoc(229);
     JsonObject ems  = nestdoc.createNestedObject("EMS");
-
     ems["G"] = arr[esp_random() % 3];
-    ems["lat"] = tgps.location.lat();
-    ems["lon"] = tgps.location.lng();
+    ems["lon"] = gpsPair.first;
+    ems["lat"] = gpsPair.second;
     ems["Needs"]["M"] = (esp_random() % 3) + 1;
     ems["Needs"]["F"] = (esp_random() % 3) + 1;
     ems["Needs"]["W"] = (esp_random() % 3) + 1;
@@ -135,13 +125,20 @@ String getGPSData() {
 }
 
 bool runSensor(void *) {
-    String sensorVal = getGPSData();
+    // Encoding the GPS
+    smartDelay(5000);
+    //make sure there is at least one point generated
+    std::pair<double,double> gpsPair = getLocation(tgps.location.lng(),tgps.location.lat(),15);
+    auto limit = esp_random()%20+1;
 
-    Serial.print("[MAMA] sensor data: ");
-    Serial.println(sensorVal);
+    for(int i=0; i < limit; i++) {
+        String sensorVal = getGPSData(gpsPair);
+        Serial.print("[MAMA] sensor data: ");
+        Serial.println(sensorVal);
 
-    //Send gps data
-    duck.sendData(topics::location, sensorVal);
+        //Send gps data
+        duck.sendData(topics::location, sensorVal);
+    }
     return true;
 }
 
@@ -150,7 +147,7 @@ void setup() {
     // given during the device provisioning then converted to a byte vector to
     // setup the duck NOTE: The Device ID must be exactly 8 bytes otherwise it
     // will get rejected
-    std::string deviceId("MAMAGPS2");
+    std::string deviceId("MAMAGPS3");
     std::vector<byte> devId;
     devId.insert(devId.end(), deviceId.begin(), deviceId.end());
 
