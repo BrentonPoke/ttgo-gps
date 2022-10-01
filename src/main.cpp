@@ -13,7 +13,6 @@
 //GPS
 #include <TinyGPS++.h>
 #include <ArduinoJson.h>
-#include <debug.h>
 
 const int btnPin = 37;
 
@@ -59,7 +58,7 @@ String getGPSData(std::pair<double,double> gpsPair ) {
     Serial.print("Longitude : ");
     Serial.println(tgps.location.lng(), 4);
     Serial.print("Altitude  : ");
-    Serial.print(tgps.altitude.feet() / 3.2808);
+    Serial.print(tgps.altitude.meters());
     Serial.println("M");
     Serial.print("Satellites: ");
     Serial.println(tgps.satellites.value());
@@ -81,8 +80,6 @@ String getGPSData(std::pair<double,double> gpsPair ) {
             tgps.time.hour(),
             tgps.time.minute(),
             tgps.time.second()));
-    Serial.print("Charge    : ");
-   // Serial.println(BL.getBatteryChargeLevel());
     Serial.print("Speed     : ");
     Serial.println(tgps.speed.kmph());
     Serial.println("**********************");
@@ -96,8 +93,18 @@ String getGPSData(std::pair<double,double> gpsPair ) {
     DynamicJsonDocument nestdoc(229);
     JsonObject ems  = nestdoc.createNestedObject("EMS");
     ems["G"] = arr[esp_random() % 3];
-    ems["lon"] = gpsPair.first;
-    ems["lat"] = gpsPair.second;
+    ems["GPS"]["lon"] = gpsPair.first;
+    ems["GPS"]["lat"] = gpsPair.second;
+    ems["GPS"]["satellites"] = tgps.satellites.value();
+    ems["GPS"]["time"] = tmConvert_t(
+            tgps.date.year(),
+            tgps.date.month(),
+            tgps.date.day(),
+            tgps.time.hour(),
+            tgps.time.minute(),
+            tgps.time.second());
+    ems["GPS"]["alt"] = tgps.altitude.meters();
+    ems["GPS"]["speed"] = tgps.speed.kmph();
     ems["Needs"]["M"] = (esp_random() % 3) + 1;
     ems["Needs"]["F"] = (esp_random() % 3) + 1;
     ems["Needs"]["W"] = (esp_random() % 3) + 1;
@@ -132,7 +139,7 @@ bool runSensor(void *) {
     std::pair<double,double> gpsPair = getLocation(tgps.location.lng(),tgps.location.lat(),15);
     auto limit = esp_random()%20+1;
 
-    info("Running GPS loop %d times", limit);
+    printf("Running GPS loop %d times", limit);
 
     for(int i=0; i < limit; i++) {
         String sensorVal = getGPSData(gpsPair);
