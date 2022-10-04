@@ -87,8 +87,6 @@ String getGPSData(std::pair<double,double> gpsPair ) {
     //test of EMS ideas...
 
     std::string arr[3] = {"NB","M","W"};
-    bool disabled[2] = {true,false};
-//    std::string gender = arr[rand()%(3)];
 
     DynamicJsonDocument nestdoc(229);
     JsonObject ems  = nestdoc.createNestedObject("EMS");
@@ -108,8 +106,6 @@ String getGPSData(std::pair<double,double> gpsPair ) {
     ems["Needs"]["M"] = (esp_random() % 3) + 1;
     ems["Needs"]["F"] = (esp_random() % 3) + 1;
     ems["Needs"]["W"] = (esp_random() % 3) + 1;
-    ems["Needs"]["D"]["P"] = disabled[esp_random()%2];
-    ems["Needs"]["D"]["M"] = disabled[esp_random()%2];
 
     String jsonstat;
     serializeJson(ems,jsonstat);
@@ -132,23 +128,18 @@ String getGPSData(std::pair<double,double> gpsPair ) {
     return jsonstat;
 }
 
-bool runSensor(void *) {
+bool runSensor(void*) {
     // Encoding the GPS
-    smartDelay(5000);
+    smartDelay(10000);
     //make sure there is at least one point generated
     std::pair<double,double> gpsPair = getLocation(tgps.location.lng(),tgps.location.lat(),15);
-    auto limit = esp_random()%20+1;
 
-    printf("Running GPS loop %d times", limit);
-
-    for(int i=0; i < limit; i++) {
         String sensorVal = getGPSData(gpsPair);
         Serial.print("[MAMA] sensor data: ");
         Serial.println(sensorVal);
 
         //Send gps data
         duck.sendData(topics::location, sensorVal);
-    }
     return true;
 }
 
@@ -157,7 +148,7 @@ void setup() {
     // given during the device provisioning then converted to a byte vector to
     // setup the duck NOTE: The Device ID must be exactly 8 bytes otherwise it
     // will get rejected
-    std::string deviceId("MAMAGPS3");
+    std::string deviceId("MAMAGPS1");
     std::vector<byte> devId;
     devId.insert(devId.end(), deviceId.begin(), deviceId.end());
 
@@ -165,17 +156,19 @@ void setup() {
     duck.setupWithDefaults(devId);
     Serial.println("MAMA-DUCK...READY!");
 
-
     pinMode(btnPin, INPUT);
     GPS.begin(9600, SERIAL_8N1, 34, 12);   //17-TX 18-RX
 
     // initialize the timer. The timer thread runs separately from the main loop
     // and will trigger sending a counter message.
-    timer.every(INTERVAL_MS, runSensor);
+    //timer.every(INTERVAL_MS, runSensor);
+    runSensor(new void*);
 }
 
 void loop() {
     timer.tick();
+    if(timer.empty())
+        timer.at(millis()+esp_random() % 300000,runSensor);
     // Use the default run(). The Mama duck is designed to also forward data it receives
     // from other ducks, across the network. It has a basic routing mechanism built-in
     // to prevent messages from hoping endlessly.
