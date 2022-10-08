@@ -15,7 +15,7 @@
 #include <ArduinoJson.h>
 
 const int btnPin = 37;
-
+std::string deviceId("MAMAGPS3");
 TinyGPSPlus tgps;
 HardwareSerial GPS(1);
 MamaDuck duck;
@@ -91,6 +91,7 @@ String getGPSData(std::pair<double,double> gpsPair ) {
     DynamicJsonDocument nestdoc(229);
     JsonObject ems  = nestdoc.createNestedObject("EMS");
     ems["G"] = arr[esp_random() % 3];
+    ems["Device"] = deviceId;
     ems["GPS"]["lon"] = gpsPair.first;
     ems["GPS"]["lat"] = gpsPair.second;
     ems["GPS"]["satellites"] = tgps.satellites.value();
@@ -135,7 +136,7 @@ bool runSensor(void*) {
     std::pair<double,double> gpsPair = getLocation(tgps.location.lng(),tgps.location.lat(),15);
 
         String sensorVal = getGPSData(gpsPair);
-        Serial.print("[MAMA] sensor data: ");
+        Serial.printf("%s sensor data: ",deviceId.c_str());
         Serial.println(sensorVal);
 
         //Send gps data
@@ -148,7 +149,6 @@ void setup() {
     // given during the device provisioning then converted to a byte vector to
     // setup the duck NOTE: The Device ID must be exactly 8 bytes otherwise it
     // will get rejected
-    std::string deviceId("MAMAGPS1");
     std::vector<byte> devId;
     devId.insert(devId.end(), deviceId.begin(), deviceId.end());
 
