@@ -4,20 +4,15 @@
 #include <Arduino.h>
 #include <unishox2.h>
 #include <ctime>
-#include <coords.h>
+
 
 #ifdef SERIAL_PORT_USBVIRTUAL
 #define Serial SERIAL_PORT_USBVIRTUAL
 #endif
 
 //GPS
-#include <TinyGPS++.h>
-#include <ArduinoJson.h>
-
+#include<telemetry.h>
 const int btnPin = 37;
-std::string deviceId("MAMAGPS3");
-TinyGPSPlus tgps;
-HardwareSerial GPS(1);
 MamaDuck duck;
 
 auto timer = timer_create_default();
@@ -35,99 +30,6 @@ static void smartDelay(unsigned long ms)
     } while (millis() - start < ms);
 }
 
-std::time_t tmConvert_t(int YYYY, int MM, byte DD, byte hh, byte mm, byte ss)
-{
-    std::tm tmSet{};
-    tmSet.tm_year = YYYY - 1900;
-    tmSet.tm_mon = MM - 1;
-    tmSet.tm_mday = DD;
-    tmSet.tm_hour = hh;
-    tmSet.tm_min = mm;
-    tmSet.tm_sec = ss;
-    std::time_t t = std::mktime(&tmSet);
-    return mktime(std::gmtime(&t));
-}
-
-// Getting GPS data
-String getGPSData(std::pair<double,double> gpsPair ) {
-
-    // Printing the GPS data
-    Serial.println("--- GPS ---");
-    Serial.print("Latitude  : ");
-    Serial.println(tgps.location.lat(), 5);
-    Serial.print("Longitude : ");
-    Serial.println(tgps.location.lng(), 4);
-    Serial.print("Altitude  : ");
-    Serial.print(tgps.altitude.meters());
-    Serial.println("M");
-    Serial.print("Satellites: ");
-    Serial.println(tgps.satellites.value());
-//    Serial.print("Time      : ");
-//    Serial.print(tgps.time.hour());
-//    Serial.print(":");
-//    Serial.print(tgps.time.minute());
-//    Serial.print(":");
-//    Serial.println(tgps.time.second());
-//    Serial.print("Raw Time  : ");
-//    Serial.println(tgps.time.value());
-    Serial.print("Raw Date  : ");
-    Serial.println(tgps.date.value());
-    Serial.print("Epoch     : ");
-    Serial.println(tmConvert_t(
-            tgps.date.year(),
-            tgps.date.month(),
-            tgps.date.day(),
-            tgps.time.hour(),
-            tgps.time.minute(),
-            tgps.time.second()));
-    Serial.print("Speed     : ");
-    Serial.println(tgps.speed.kmph());
-    Serial.println("**********************");
-
-    //test of EMS ideas...
-
-    std::string arr[3] = {"NB","M","W"};
-
-    DynamicJsonDocument nestdoc(229);
-    JsonObject ems  = nestdoc.createNestedObject("EMS");
-    ems["G"] = arr[esp_random() % 3];
-    ems["Device"] = deviceId;
-    ems["GPS"]["lon"] = gpsPair.first;
-    ems["GPS"]["lat"] = gpsPair.second;
-    ems["GPS"]["satellites"] = tgps.satellites.value();
-    ems["GPS"]["time"] = tmConvert_t(
-            tgps.date.year(),
-            tgps.date.month(),
-            tgps.date.day(),
-            tgps.time.hour(),
-            tgps.time.minute(),
-            tgps.time.second());
-    ems["GPS"]["alt"] = tgps.altitude.meters();
-    ems["GPS"]["speed"] = tgps.speed.kmph();
-    ems["Needs"]["M"] = (esp_random() % 3) + 1;
-    ems["Needs"]["F"] = (esp_random() % 3) + 1;
-    ems["Needs"]["W"] = (esp_random() % 3) + 1;
-
-    String jsonstat;
-    serializeJson(ems,jsonstat);
-
-    Serial.println("Payload: " + jsonstat);
-    Serial.print("Payload Size: ");
-    Serial.println(jsonstat.length());
-
-    /*
-     char buff[229];
-    unishox2_compress_simple(jsonstat.c_str(), int(jsonstat.length()), buff);
-     */
-    // Creating a message of the Latitude and Longitude
-    // Check to see if GPS data is being received
-    if (millis() > 5000 && tgps.charsProcessed() < 10)
-    {
-        Serial.println(F("No GPS data received: check wiring"));
-    }
-
-    return jsonstat;
-}
 
 bool runSensor(void*) {
     // Encoding the GPS
@@ -149,6 +51,7 @@ void setup() {
     // given during the device provisioning then converted to a byte vector to
     // setup the duck NOTE: The Device ID must be exactly 8 bytes otherwise it
     // will get rejected
+
     std::vector<byte> devId;
     devId.insert(devId.end(), deviceId.begin(), deviceId.end());
 
