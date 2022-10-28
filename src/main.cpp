@@ -47,7 +47,7 @@ bool runSensor(void*) {
     }
     for (int i = 0; i < count+1; i++) {
         String sensorVal = getGPSData(gpsPair, seqID, i);
-        Serial.println(sensorVal);
+        //Serial.println(sensorVal);
         //Send gps data
         duck.sendData(topics::location, sensorVal);
         sleep(1);
