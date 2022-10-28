@@ -23,7 +23,7 @@ std::time_t tmConvert_t(int YYYY, int MM, byte DD, byte hh, byte mm, byte ss)
 }
 
 // Getting GPS data
-String getGPSData(std::pair<double,double> gpsPair ) {
+String getGPSData(std::pair<double,double> gpsPair, byte* seqid, int count) {
 
     // Printing the GPS data
     Serial.println("--- GPS ---");
@@ -58,6 +58,8 @@ String getGPSData(std::pair<double,double> gpsPair ) {
     JsonObject ems  = nestdoc.createNestedObject("EMS");
     ems["G"] = arr[esp_random() % 3];
     ems["Device"] = deviceId;
+    ems["seqID"] = seqid;
+    ems["seqNum"] = count;
     ems["GPS"]["lon"] = gpsPair.first;
     ems["GPS"]["lat"] = gpsPair.second;
     ems["GPS"]["satellites"] = tgps.satellites.value();
