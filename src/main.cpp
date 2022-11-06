@@ -19,6 +19,7 @@ auto timer = timer_create_default();
 const int INTERVAL_MS = 20000;
 char message[32];
 int counter = 1;
+#define MESSEGES 300
 
 static void smartDelay(unsigned long ms)
 {
@@ -50,6 +51,7 @@ bool runSensor(void*) {
         //Serial.println(sensorVal);
         //Send gps data
         duck.sendData(topics::location, sensorVal);
+        counter++;
         sleep(1);
     }
     return true;
@@ -79,8 +81,16 @@ void setup() {
 
 void loop() {
     timer.tick();
-    if(timer.empty())
-        timer.at(millis()+esp_random() % 300000,runSensor);
+    if(counter < MESSEGES) {
+        if (timer.empty())
+            timer.at(millis() + esp_random() % 300000, runSensor);
+    }
+    else{
+        Serial.println("Done sending messages");
+        while(true) {
+            delay(1000);
+        }
+    }
     // Use the default run(). The Mama duck is designed to also forward data it receives
     // from other ducks, across the network. It has a basic routing mechanism built-in
     // to prevent messages from hoping endlessly.
