@@ -2,8 +2,6 @@
 #include <arduino-timer.h>
 #include <MamaDuck.h>
 #include <Arduino.h>
-#include <unishox2.h>
-#include <ctime>
 
 
 #ifdef SERIAL_PORT_USBVIRTUAL
@@ -17,9 +15,7 @@ MamaDuck duck;
 
 auto timer = timer_create_default();
 const int INTERVAL_MS = 20000;
-char message[32];
 int counter = 1;
-#define MESSEGES 300
 
 static void smartDelay(unsigned long ms)
 {
@@ -38,7 +34,7 @@ bool runSensor(void*) {
     //make sure there is at least one point generated
     std::pair<double,double> gpsPair = getLocation(tgps.location.lng(),tgps.location.lat(),15);
     //a max of 3 packets per transmission session
-    unsigned int count = esp_random() % 4;
+    unsigned int count = esp_random() % 3;
     byte seqID[6];
     std::uniform_int_distribution<int> distribution(0,35);
     std::default_random_engine eng{esp_random()};
@@ -46,7 +42,8 @@ bool runSensor(void*) {
     for (int i = 0; i < sizeof(seqID) ; i++) {
         seqID[i] = digits[distribution(eng)];
     }
-    for (int i = 0; i < count+1; i++) {
+    //make sure at least one packet is sent
+    for (int i = 0; i < count; i++) {
         String sensorVal = getGPSData(gpsPair, seqID, i);
         //Serial.println(sensorVal);
         //Send gps data
@@ -81,16 +78,11 @@ void setup() {
 
 void loop() {
     timer.tick();
-    if(counter < MESSEGES) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> distrib(1000, 300000);
         if (timer.empty())
-            timer.at(millis() + esp_random() % 300000, runSensor);
-    }
-    else{
-        Serial.println("Done sending messages");
-        while(true) {
-            delay(1000);
-        }
-    }
+            timer.at(distrib(gen), runSensor);
     // Use the default run(). The Mama duck is designed to also forward data it receives
     // from other ducks, across the network. It has a basic routing mechanism built-in
     // to prevent messages from hoping endlessly.
