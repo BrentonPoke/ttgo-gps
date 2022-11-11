@@ -68,7 +68,11 @@ void setup() {
     Serial.println("MAMA-DUCK...READY!");
 
     pinMode(btnPin, INPUT);
-    GPS.begin(9600, SERIAL_8N1, 34, 12);   //17-TX 18-RX
+    GPS.begin(115200, SERIAL_8N1, 34, 12);   //17-TX 18-RX
+
+    display = DuckDisplay::getInstance();
+    display->setupDisplay(duck.getType(), devId);
+    display->showDefaultScreen();
 
     // initialize the timer. The timer thread runs separately from the main loop
     // and will trigger sending a counter message.
