@@ -37,10 +37,6 @@ auto timer = timer_create_default();
 const int INTERVAL_MS = 20000;
 int counter = 1;
 
-std::random_device rd;
-std::mt19937 gen(rd());
-std::uniform_int_distribution<> distrib(1000, 300000);
-
 static void smartDelay(unsigned long ms)
 {
     unsigned long start = millis();
@@ -109,8 +105,10 @@ void setup() {
 
 void loop() {
     timer.tick();
+    std::mt19937 gen(millis());
+    std::uniform_int_distribution<> distrib(1000, 300000);
         if (timer.empty())
-            timer.at(distrib(gen), runSensor);
+            timer.at(millis() + distrib(gen), runSensor);
     // Use the default run(). The Mama duck is designed to also forward data it receives
     // from other ducks, across the network. It has a basic routing mechanism built-in
     // to prevent messages from hoping endlessly.
