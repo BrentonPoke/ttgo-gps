@@ -35,7 +35,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 auto timer = timer_create_default();
 const int INTERVAL_MS = 20000;
-//int counter = 1;
+int counter = 1;
 
 static void smartDelay(unsigned long ms)
 {
@@ -53,8 +53,6 @@ bool runSensor(void*) {
     smartDelay(10000);
     //make sure there is at least one point generated
     std::pair<double,double> gpsPair = getLocation(tgps.location.lng(),tgps.location.lat(),15);
-    //a max of 3 packets per transmission session
-    unsigned int count = esp_random() % 3;
     byte seqID[6];
     std::uniform_int_distribution<int> distribution(0,35);
     std::default_random_engine eng{esp_random()};
@@ -63,12 +61,13 @@ bool runSensor(void*) {
         seqID[i] = digits[distribution(eng)];
     }
     //make sure at least one packet is sent
-    for (int i = 0; i <= 3; i++) {
+    for (int i = 0; i < 3; i++) {
         String sensorVal = getGPSData(gpsPair, seqID, i);
         //Serial.println(sensorVal);
         //Send gps data
         duck.sendData(topics::location, sensorVal);
-        //counter++;
+        counter++;
+        sleep(1);
     }
     return true;
 }
@@ -105,7 +104,7 @@ void setup() {
 void loop() {
     timer.tick();
     std::mt19937 gen(millis());
-    std::uniform_int_distribution<> distrib(1000, 300000);
+    std::exponential_distribution<> distrib(1.0);
         if (timer.empty())
             timer.at(millis() + distrib(gen), runSensor);
     // Use the default run(). The Mama duck is designed to also forward data it receives
