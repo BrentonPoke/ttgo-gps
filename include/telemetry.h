@@ -6,10 +6,10 @@
 #include <coords.h>
 #include <TinyGPS++.h>
 #include <ArduinoJson.h>
-std::string deviceId("MAMAGPS1");
+
+std::string deviceId("MAMAGPS3");
 TinyGPSPlus tgps;
 HardwareSerial GPS(1);
-DuckDisplay* display = NULL;
 
 std::time_t tmConvert_t(int YYYY, int MM, byte DD, byte hh, byte mm, byte ss)
 {
@@ -82,14 +82,17 @@ String getGPSData(std::pair<double,double> gpsPair, byte* seqid, int count) {
     Serial.print("Payload Size: ");
     Serial.println(jsonstat.length());
 
-    display->clear();
-    display->drawString(0, 10, "Generated Message");
-    display->drawString(0, 20, deviceId.c_str());
-    display->drawString(0,30,"SeqID: ");
-    display->drawString(sizeof ("SeqID: "), 30, ems["seqID"].as<const char*>());
-    display->drawString(0,40,"Time: ");
-    display->drawString(sizeof ("Time: "), 40, ems["GPS"]["time"]);
-    display->sendBuffer();
+    display.clearDisplay();
+    display.setTextSize(1); // Draw 2X-scale text
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(0, 0);
+    display.println("Generated Message");
+    display.println(deviceId.c_str());
+    display.print("SeqID: ");
+    display.println(ems["seqID"].as<String>());
+    display.print("Time: ");
+    display.println(ems["GPS"]["time"].as<long>());
+    display.display();
 
     /*
      char buff[229];
