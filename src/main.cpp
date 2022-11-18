@@ -35,7 +35,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 auto timer = timer_create_default();
 const int INTERVAL_MS = 20000;
-int counter = 1;
+//int counter = 1;
 
 static void smartDelay(unsigned long ms)
 {
@@ -61,13 +61,13 @@ bool runSensor(void*) {
         seqID[i] = digits[distribution(eng)];
     }
     //make sure at least one packet is sent
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i <= 4; i++) {
         String sensorVal = getGPSData(gpsPair, seqID, i);
         //Serial.println(sensorVal);
         //Send gps data
         duck.sendData(topics::location, sensorVal);
-        counter++;
-        sleep(1);
+        //counter++;
+        //sleep(1);
     }
     return true;
 }
