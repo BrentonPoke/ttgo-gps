@@ -104,9 +104,9 @@ void setup() {
 void loop() {
     timer.tick();
     std::mt19937 gen(millis());
-    std::exponential_distribution<> distrib(1.0);
+    std::exponential_distribution<double> distrib(2.5);
         if (timer.empty())
-            timer.at(millis() + distrib(gen), runSensor);
+            timer.at(millis() + distrib(gen)*400000, runSensor);
     // Use the default run(). The Mama duck is designed to also forward data it receives
     // from other ducks, across the network. It has a basic routing mechanism built-in
     // to prevent messages from hoping endlessly.
