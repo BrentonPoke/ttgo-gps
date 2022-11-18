@@ -7,7 +7,7 @@
 #include <TinyGPS++.h>
 #include <ArduinoJson.h>
 
-std::string deviceId("MAMAGPSB");
+std::string deviceId("MAMAGPS6");
 TinyGPSPlus tgps;
 HardwareSerial GPS(1);
 
