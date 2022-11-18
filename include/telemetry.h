@@ -7,7 +7,7 @@
 #include <TinyGPS++.h>
 #include <ArduinoJson.h>
 
-std::string deviceId("MAMAGPSB");
+std::string deviceId("MAMAGPS6");
 TinyGPSPlus tgps;
 HardwareSerial GPS(1);
 
@@ -83,7 +83,7 @@ String getGPSData(std::pair<double,double> gpsPair, byte* seqid, int count) {
     Serial.println(jsonstat.length());
 
     display.clearDisplay();
-    display.setTextSize(1); // Draw 2X-scale text
+    display.setTextSize(1); // Draw 1X-scale text
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(0, 0);
     display.println("Generated Message");
