@@ -10,6 +10,7 @@
 #define Serial SERIAL_PORT_USBVIRTUAL
 #endif
 #define CDP_LOG_INFO
+#define ARDUINO_TBeam
 //GPS
 #define LORA_FREQ 915.0 // Frequency Range. Set for US Region 915.0Mhz
 #define LORA_TXPOWER 20 // Transmit Power
@@ -108,7 +109,7 @@ void loop() {
     std::mt19937 gen(millis());
     std::uniform_int_distribution<> distrib(1000, 300000);
         if (timer.empty())
-            timer.at(millis() + distrib(gen), runSensor);
+            timer.in(distrib(gen), runSensor);
     // Use the default run(). The Mama duck is designed to also forward data it receives
     // from other ducks, across the network. It has a basic routing mechanism built-in
     // to prevent messages from hoping endlessly.
