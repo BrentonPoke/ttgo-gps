@@ -55,7 +55,6 @@ bool runSensor(void*) {
     //make sure there is at least one point generated
     std::pair<double,double> gpsPair = getLocation(tgps.location.lng(),tgps.location.lat(),15);
     //a max of 3 packets per transmission session
-    unsigned int count = esp_random() % 3;
     byte seqID[6];
     std::uniform_int_distribution<int> distribution(0,35);
     std::default_random_engine eng{esp_random()};
@@ -63,9 +62,9 @@ bool runSensor(void*) {
     for (int i = 0; i < sizeof(seqID) ; i++) {
         seqID[i] = digits[distribution(eng)];
     }
-    //make sure at least one packet is sent
+    unsigned long timepoint = millis();
     for (int i = 0; i <= 3; i++) {
-        String sensorVal = getGPSData(gpsPair, seqID, i);
+        String sensorVal = getGPSData(gpsPair, seqID, i,timepoint);
         //Serial.println(sensorVal);
         //Send gps data
         duck.sendData(topics::location, sensorVal);
