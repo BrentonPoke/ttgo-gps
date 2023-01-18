@@ -8,7 +8,7 @@
 #include <ArduinoJson.h>
 #include <ctime>
 
-std::string deviceId("MAMAGPSE");
+std::string deviceId("MAMAGPS5");
 TinyGPSPlus tgps;
 HardwareSerial GPS(1);
 std::time_t tmConvert_t(int YYYY, byte MM, byte DD, byte hh, byte mm, byte ss);
@@ -53,6 +53,8 @@ String getGPSData(std::pair<double,double> gpsPair, byte* seqid, int count, unsi
     ems["MCUdelay"] = millis() - timepoint;
     ems["GPS"]["lon"] = gpsPair.first;
     ems["GPS"]["lat"] = gpsPair.second;
+    ems["GPS"]["nodeLat"] = tgps.location.lat();
+    ems["GPS"]["nodeLong"] = tgps.location.lng();
     ems["GPS"]["satellites"] = tgps.satellites.value();
     ems["GPS"]["time"] = tmConvert_t(
             tgps.date.year(),
@@ -80,7 +82,9 @@ String getGPSData(std::pair<double,double> gpsPair, byte* seqid, int count, unsi
     display.print("SeqID: ");
     display.println(ems["seqID"].as<String>());
     display.print("Time: ");
-    display.println(ems["GPS"]["time"].as<long>());
+    display.println(ems["GPS"]["time"].as<time_t>());
+    display.println("Lat, Long: ");
+    display.printf("%f, %f", ems["GPS"]["nodeLat"].as<double>(), ems["GPS"]["nodeLong"].as<double>());
     display.display();
 
     /*
