@@ -8,14 +8,20 @@
 #include <ArduinoJson.h>
 #include <ctime>
 
-std::string deviceId("MAMAGPS5");
+std::string deviceId("MAMAGPS7");
 TinyGPSPlus tgps;
 HardwareSerial GPS(1);
 std::time_t tmConvert_t(int YYYY, byte MM, byte DD, byte hh, byte mm, byte ss);
 
 // Getting GPS data
-String getGPSData(std::pair<double,double> gpsPair, byte* seqid, int count, unsigned long timepoint) {
-
+String getGPSData(byte* seqid, int count, unsigned long timepoint) {
+    time_t t= tmConvert_t(
+            tgps.date.year(),
+            tgps.date.month(),
+            tgps.date.day(),
+            tgps.time.hour(),
+            tgps.time.minute(),
+            tgps.time.second());
     // Printing the GPS data
     Serial.println("--- GPS ---");
     Serial.print("Latitude  : ");
@@ -30,13 +36,7 @@ String getGPSData(std::pair<double,double> gpsPair, byte* seqid, int count, unsi
     Serial.print("Raw Date  : ");
     Serial.println(tgps.date.value());
     Serial.print("Epoch     : ");
-    Serial.println(tmConvert_t(
-            tgps.date.year(),
-            tgps.date.month(),
-            tgps.date.day(),
-            tgps.time.hour(),
-            tgps.time.minute(),
-            tgps.time.second()));
+    Serial.println(t);
     Serial.print("Speed     : ");
     Serial.println(tgps.speed.kmph());
     Serial.println("**********************");
@@ -51,18 +51,12 @@ String getGPSData(std::pair<double,double> gpsPair, byte* seqid, int count, unsi
     ems["seqID"] = seqid;
     ems["seqNum"] = count;
     ems["MCUdelay"] = millis() - timepoint;
-    ems["GPS"]["lon"] = gpsPair.first;
-    ems["GPS"]["lat"] = gpsPair.second;
-    ems["GPS"]["nodeLat"] = tgps.location.lat();
-    ems["GPS"]["nodeLong"] = tgps.location.lng();
+    ems["GPS"]["lon"] = tgps.location.lat();
+    ems["GPS"]["lat"] =  tgps.location.lng();
+    //ems["GPS"]["nodeLat"] = tgps.location.lat();
+    //ems["GPS"]["nodeLong"] = tgps.location.lng();
     ems["GPS"]["satellites"] = tgps.satellites.value();
-    ems["GPS"]["time"] = tmConvert_t(
-            tgps.date.year(),
-            tgps.date.month(),
-            tgps.date.day(),
-            tgps.time.hour(),
-            tgps.time.minute(),
-            tgps.time.second());
+    ems["GPS"]["time"] = t;
     ems["GPS"]["alt"] = tgps.altitude.meters();
     ems["GPS"]["speed"] = tgps.speed.kmph();
 
@@ -84,7 +78,7 @@ String getGPSData(std::pair<double,double> gpsPair, byte* seqid, int count, unsi
     display.print("Time: ");
     display.println(ems["GPS"]["time"].as<time_t>());
     display.println("Lat, Long: ");
-    display.printf("%f, %f", ems["GPS"]["nodeLat"].as<double>(), ems["GPS"]["nodeLong"].as<double>());
+    display.printf("%f, %f", ems["GPS"]["lat"].as<double>(), ems["GPS"]["lon"].as<double>());
     display.display();
 
     /*
