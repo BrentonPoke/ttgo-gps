@@ -11,23 +11,17 @@
 std::string deviceId("MAMAGPS7");
 TinyGPSPlus tgps;
 HardwareSerial GPS(1);
-
-std::time_t tmConvert_t(int YYYY, int MM, byte DD, byte hh, byte mm, byte ss)
-{
-    std::tm tmSet{};
-    tmSet.tm_year = YYYY - 1900;
-    tmSet.tm_mon = MM - 1;
-    tmSet.tm_mday = DD;
-    tmSet.tm_hour = hh;
-    tmSet.tm_min = mm;
-    tmSet.tm_sec = ss;
-    std::time_t t = std::mktime(&tmSet);
-    return mktime(std::gmtime(&t));
-}
+std::time_t tmConvert_t(int YYYY, byte MM, byte DD, byte hh, byte mm, byte ss);
 
 // Getting GPS data
-String getGPSData(std::pair<double,double> gpsPair, byte* seqid, int count) {
-
+String getGPSData(byte* seqid, int count, unsigned long timepoint) {
+    time_t t= tmConvert_t(
+            tgps.date.year(),
+            tgps.date.month(),
+            tgps.date.day(),
+            tgps.time.hour(),
+            tgps.time.minute(),
+            tgps.time.second());
     // Printing the GPS data
     Serial.println("--- GPS ---");
     Serial.print("Latitude  : ");
@@ -42,13 +36,7 @@ String getGPSData(std::pair<double,double> gpsPair, byte* seqid, int count) {
     Serial.print("Raw Date  : ");
     Serial.println(tgps.date.value());
     Serial.print("Epoch     : ");
-    Serial.println(tmConvert_t(
-            tgps.date.year(),
-            tgps.date.month(),
-            tgps.date.day(),
-            tgps.time.hour(),
-            tgps.time.minute(),
-            tgps.time.second()));
+    Serial.println(t);
     Serial.print("Speed     : ");
     Serial.println(tgps.speed.kmph());
     Serial.println("**********************");
@@ -59,20 +47,16 @@ String getGPSData(std::pair<double,double> gpsPair, byte* seqid, int count) {
 
     DynamicJsonDocument nestdoc(229);
     JsonObject ems  = nestdoc.createNestedObject("EMS");
-    ems["G"] = arr[esp_random() % 3];
     ems["Device"] = deviceId;
     ems["seqID"] = seqid;
     ems["seqNum"] = count;
-    ems["GPS"]["lon"] = gpsPair.first;
-    ems["GPS"]["lat"] = gpsPair.second;
+    ems["MCUdelay"] = millis() - timepoint;
+    ems["GPS"]["lon"] = tgps.location.lat();
+    ems["GPS"]["lat"] =  tgps.location.lng();
+    //ems["GPS"]["nodeLat"] = tgps.location.lat();
+    //ems["GPS"]["nodeLong"] = tgps.location.lng();
     ems["GPS"]["satellites"] = tgps.satellites.value();
-    ems["GPS"]["time"] = tmConvert_t(
-            tgps.date.year(),
-            tgps.date.month(),
-            tgps.date.day(),
-            tgps.time.hour(),
-            tgps.time.minute(),
-            tgps.time.second());
+    ems["GPS"]["time"] = t;
     ems["GPS"]["alt"] = tgps.altitude.meters();
     ems["GPS"]["speed"] = tgps.speed.kmph();
 
@@ -84,7 +68,7 @@ String getGPSData(std::pair<double,double> gpsPair, byte* seqid, int count) {
     Serial.println(jsonstat.length());
 
     display.clearDisplay();
-    display.setTextSize(1); // Draw 1X-scale text
+    display.setTextSize(1); // Draw 2X-scale text
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(0, 0);
     display.println("Generated Message");
@@ -92,7 +76,9 @@ String getGPSData(std::pair<double,double> gpsPair, byte* seqid, int count) {
     display.print("SeqID: ");
     display.println(ems["seqID"].as<String>());
     display.print("Time: ");
-    display.println(ems["GPS"]["time"].as<long>());
+    display.println(ems["GPS"]["time"].as<time_t>());
+    display.println("Lat, Long: ");
+    display.printf("%f, %f", ems["GPS"]["lat"].as<double>(), ems["GPS"]["lon"].as<double>());
     display.display();
 
     /*
@@ -107,6 +93,19 @@ String getGPSData(std::pair<double,double> gpsPair, byte* seqid, int count) {
     }
 
     return jsonstat;
+}
+
+std::time_t tmConvert_t(int YYYY, byte MM, byte DD, byte hh, byte mm, byte ss)
+{
+    std::tm tmSet{};
+    tmSet.tm_year = YYYY - 1900;
+    tmSet.tm_mon = MM - 1;
+    tmSet.tm_mday = DD;
+    tmSet.tm_hour = hh;
+    tmSet.tm_min = mm;
+    tmSet.tm_sec = ss;
+    std::time_t t = std::mktime(&tmSet);
+    return mktime(std::gmtime(&t));
 }
 
 #endif TELEMETRY_H

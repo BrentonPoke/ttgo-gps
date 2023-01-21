@@ -61,8 +61,9 @@ bool runSensor(void*) {
         seqID[i] = digits[distribution(eng)];
     }
     //make sure at least one packet is sent
+    unsigned long timepoint = millis();
     for (int i = 0; i <= 4; i++) {
-        String sensorVal = getGPSData(gpsPair, seqID, i);
+        String sensorVal = getGPSData(seqID, i, timepoint);
         //Serial.println(sensorVal);
         //Send gps data
         duck.sendData(topics::location, sensorVal);
