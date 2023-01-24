@@ -43,8 +43,6 @@ String getGPSData(byte* seqid, int count, unsigned long timepoint) {
 
     //test of EMS ideas...
 
-    std::string arr[3] = {"NB","M","W"};
-
     DynamicJsonDocument nestdoc(229);
     JsonObject ems  = nestdoc.createNestedObject("EMS");
     ems["Device"] = deviceId;
