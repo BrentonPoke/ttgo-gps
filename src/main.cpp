@@ -2,10 +2,13 @@
 #include <arduino-timer.h>
 #include <MamaDuck.h>
 #include <Arduino.h>
-#include <SPI.h>
+#define XPOWERS_CHIP_AXP192
+#include <XPowersLib.h>
 #include <Wire.h>
 #include <Adafruit_SSD1306.h>
 
+
+XPowersPMU PMU;
 #ifdef SERIAL_PORT_USBVIRTUAL
 #define Serial SERIAL_PORT_USBVIRTUAL
 #endif
@@ -82,6 +85,11 @@ void setup() {
     WiFi.mode(WIFI_OFF);
     std::vector<byte> devId;
     devId.insert(devId.end(), deviceId.begin(), deviceId.end());
+    bool result = PMU.begin(Wire, AXP192_SLAVE_ADDRESS, 21, 22);
+
+    if (!result) {
+        Serial.println("PMU is not online..."); while (1)delay(50);
+    }
 
     // Use the default setup provided by the SDK
     duck.setDeviceId(devId);

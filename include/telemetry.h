@@ -8,7 +8,7 @@
 #include <ArduinoJson.h>
 #include <ctime>
 
-std::string deviceId("MAMAGPS7");
+std::string deviceId("MAMAGPS9");
 TinyGPSPlus tgps;
 HardwareSerial GPS(1);
 std::time_t tmConvert_t(int YYYY, byte MM, byte DD, byte hh, byte mm, byte ss);
@@ -36,7 +36,7 @@ String getGPSData(byte* seqid, int count, unsigned long timepoint) {
     Serial.print("Raw Date  : ");
     Serial.println(tgps.date.value());
     Serial.print("Epoch     : ");
-    Serial.println(t);
+    Serial.println(tgps.date.year());
     Serial.print("Speed     : ");
     Serial.println(tgps.speed.kmph());
     Serial.println("**********************");
@@ -51,8 +51,8 @@ String getGPSData(byte* seqid, int count, unsigned long timepoint) {
     ems["MCUdelay"] = millis() - timepoint;
     ems["GPS"]["lon"] = tgps.location.lat();
     ems["GPS"]["lat"] =  tgps.location.lng();
-    //ems["GPS"]["nodeLat"] = tgps.location.lat();
-    //ems["GPS"]["nodeLong"] = tgps.location.lng();
+    ems["Voltage"] = PMU.getBattVoltage();
+    ems["level"] = PMU.getBatteryPercent();
     ems["GPS"]["satellites"] = tgps.satellites.value();
     ems["GPS"]["time"] = t;
     ems["GPS"]["alt"] = tgps.altitude.meters();
@@ -69,7 +69,6 @@ String getGPSData(byte* seqid, int count, unsigned long timepoint) {
     display.setTextSize(1); // Draw 2X-scale text
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(0, 0);
-    display.println("Generated Message");
     display.println(deviceId.c_str());
     display.print("SeqID: ");
     display.println(ems["seqID"].as<String>());
@@ -77,6 +76,11 @@ String getGPSData(byte* seqid, int count, unsigned long timepoint) {
     display.println(ems["GPS"]["time"].as<time_t>());
     display.println("Lat, Long: ");
     display.printf("%f, %f", ems["GPS"]["lat"].as<double>(), ems["GPS"]["lon"].as<double>());
+    display.print("Voltage: ");
+    display.print(PMU.getBattVoltage());
+    display.println(" mV");
+    display.print("Percentage: ");
+    display.println(PMU.getBatteryPercent());
     display.display();
 
     /*
