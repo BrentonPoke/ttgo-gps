@@ -2,9 +2,15 @@
 #include <arduino-timer.h>
 #include <MamaDuck.h>
 #include <Arduino.h>
-#include <SPI.h>
+#define XPOWERS_CHIP_AXP192
+#include <XPowersLib.h>
 #include <Wire.h>
 #include <Adafruit_SSD1306.h>
+
+
+XPowersPMU PMU;
+
+#define ARDUINO_TBeam
 
 #ifdef SERIAL_PORT_USBVIRTUAL
 #define Serial SERIAL_PORT_USBVIRTUAL
@@ -52,7 +58,6 @@ bool runSensor(void*) {
     // Encoding the GPS
     smartDelay(10000);
     //make sure there is at least one point generated
-    std::pair<double,double> gpsPair = getLocation(tgps.location.lng(),tgps.location.lat(),15);
     byte seqID[6];
     std::uniform_int_distribution<int> distribution(0,35);
     std::default_random_engine eng{esp_random()};
@@ -62,7 +67,7 @@ bool runSensor(void*) {
     }
     //make sure at least one packet is sent
     unsigned long timepoint = millis();
-    for (int i = 0; i <= 4; i++) {
+    for (int i = 0; i < 4; i++) {
         String sensorVal = getGPSData(seqID, i, timepoint);
         //Serial.println(sensorVal);
         //Send gps data
@@ -74,14 +79,15 @@ bool runSensor(void*) {
 }
 
 void setup() {
-    // We are using a hardcoded device id here, but it should be retrieved or
-    // given during the device provisioning then converted to a byte vector to
-    // setup the duck NOTE: The Device ID must be exactly 8 bytes otherwise it
-    // will get rejected
     Wire.begin(21, 22);
     WiFi.mode(WIFI_OFF);
     std::vector<byte> devId;
     devId.insert(devId.end(), deviceId.begin(), deviceId.end());
+    bool result = PMU.begin(Wire, AXP192_SLAVE_ADDRESS, 21, 22);
+
+    if (!result) {
+        Serial.println("PMU is not online...");
+    }
 
     // Use the default setup provided by the SDK
     duck.setDeviceId(devId);
