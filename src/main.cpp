@@ -56,8 +56,6 @@ bool runSensor(void*) {
     // Encoding the GPS
     smartDelay(10000);
     //make sure there is at least one point generated
-    std::pair<double,double> gpsPair = getLocation(tgps.location.lng(),tgps.location.lat(),15);
-    //a max of 3 packets per transmission session
     byte seqID[6];
     std::uniform_int_distribution<int> distribution(0,35);
     std::default_random_engine eng{esp_random()};
@@ -65,22 +63,20 @@ bool runSensor(void*) {
     for (int i = 0; i < sizeof(seqID) ; i++) {
         seqID[i] = digits[distribution(eng)];
     }
+    //make sure at least one packet is sent
     unsigned long timepoint = millis();
-    for (int i = 0; i <= 3; i++) {
-        String sensorVal = getGPSData(seqID, i,timepoint);
+    for (int i = 0; i < 4; i++) {
+        String sensorVal = getGPSData(seqID, i, timepoint);
         //Serial.println(sensorVal);
         //Send gps data
         duck.sendData(topics::location, sensorVal);
         //counter++;
+        //sleep(1);
     }
     return true;
 }
 
 void setup() {
-    // We are using a hardcoded device id here, but it should be retrieved or
-    // given during the device provisioning then converted to a byte vector to
-    // setup the duck NOTE: The Device ID must be exactly 8 bytes otherwise it
-    // will get rejected
     Wire.begin(21, 22);
     WiFi.mode(WIFI_OFF);
     std::vector<byte> devId;
@@ -88,7 +84,7 @@ void setup() {
     bool result = PMU.begin(Wire, AXP192_SLAVE_ADDRESS, 21, 22);
 
     if (!result) {
-        Serial.println("PMU is not online..."); while (1)delay(50);
+        Serial.println("PMU is not online...");
     }
 
     // Use the default setup provided by the SDK
@@ -113,9 +109,9 @@ void setup() {
 void loop() {
     timer.tick();
     std::mt19937 gen(millis());
-    std::uniform_int_distribution<> distrib(1000, 300000);
-        if (timer.empty())
-            timer.in(distrib(gen), runSensor);
+    std::exponential_distribution<double> distrib(2.5);
+    if (timer.empty())
+        timer.in(distrib(gen)*400000, runSensor);
     // Use the default run(). The Mama duck is designed to also forward data it receives
     // from other ducks, across the network. It has a basic routing mechanism built-in
     // to prevent messages from hoping endlessly.
