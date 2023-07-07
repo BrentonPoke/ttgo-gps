@@ -13,14 +13,6 @@ XPowersPMU PMU;
 #define Serial SERIAL_PORT_USBVIRTUAL
 #endif
 #define CDP_LOG_INFO
-//GPS
-#define LORA_FREQ 915.0 // Frequency Range. Set for US Region 915.0Mhz
-#define LORA_TXPOWER 20 // Transmit Power
-// LORA HELTEC PIN CONFIG
-#define LORA_CS_PIN 18
-#define LORA_DIO0_PIN 26
-#define LORA_DIO1_PIN -1 // unused
-#define LORA_RST_PIN 23
 const int btnPin = 37;
 MamaDuck duck;
 #define LOGO_HEIGHT   16
@@ -92,7 +84,7 @@ void setup() {
     duck.setDeviceId(devId);
     // initialize the serial component with the hardware supported baudrate
     duck.setupSerial(115200);
-    duck.setupRadio(LORA_FREQ, LORA_CS_PIN, LORA_RST_PIN, LORA_DIO0_PIN, LORA_DIO1_PIN, LORA_TXPOWER);
+    duck.setupRadio();
     Serial.println("MAMA-DUCK...READY!");
 
     pinMode(btnPin, INPUT);
