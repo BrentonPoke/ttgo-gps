@@ -13,7 +13,6 @@ XPowersPMU PMU;
 #define Serial SERIAL_PORT_USBVIRTUAL
 #endif
 #define CDP_LOG_INFO
-#define ARDUINO_TBeam
 //GPS
 #define LORA_FREQ 915.0 // Frequency Range. Set for US Region 915.0Mhz
 #define LORA_TXPOWER 20 // Transmit Power
@@ -24,7 +23,6 @@ XPowersPMU PMU;
 #define LORA_RST_PIN 23
 const int btnPin = 37;
 MamaDuck duck;
-
 #define LOGO_HEIGHT   16
 #define LOGO_WIDTH    16
 #define OLED_RESET     -1
@@ -56,7 +54,6 @@ bool runSensor(void*) {
     // Encoding the GPS
     smartDelay(10000);
     //make sure there is at least one point generated
-    std::pair<double,double> gpsPair = getLocation(tgps.location.lng(),tgps.location.lat(),15);
     //a max of 3 packets per transmission session
     byte seqID[6];
     std::uniform_int_distribution<int> distribution(0,35);
@@ -88,7 +85,7 @@ void setup() {
     bool result = PMU.begin(Wire, AXP192_SLAVE_ADDRESS, 21, 22);
 
     if (!result) {
-        Serial.println("PMU is not online..."); while (1)delay(50);
+        Serial.println("PMU is not online...");
     }
 
     // Use the default setup provided by the SDK
@@ -103,7 +100,6 @@ void setup() {
 
     display.begin(SSD1306_SWITCHCAPVCC,SCREEN_ADDRESS);
     display.display();
-
     // initialize the timer. The timer thread runs separately from the main loop
     // and will trigger sending a counter message.
     //timer.every(INTERVAL_MS, runSensor);

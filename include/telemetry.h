@@ -66,7 +66,7 @@ String getGPSData(byte* seqid, int count, unsigned long timepoint) {
     Serial.println(jsonstat.length());
 
     display.clearDisplay();
-    display.setTextSize(1); // Draw 2X-scale text
+    display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(0, 0);
     display.println(deviceId.c_str());
@@ -110,4 +110,4 @@ std::time_t tmConvert_t(int YYYY, byte MM, byte DD, byte hh, byte mm, byte ss)
     return mktime(std::gmtime(&t));
 }
 
-#endif TELEMETRY_H
+#endif
