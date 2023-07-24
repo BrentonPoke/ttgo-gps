@@ -23,7 +23,7 @@ MamaDuck duck;
 #define SCREEN_ADDRESS 0x3c
 #define CDPCFG_WIFI_NONE
 
-
+//DuckDisplay* display = NULL;
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #include <telemetry.h>
 
@@ -31,20 +31,20 @@ auto timer = timer_create_default();
 const int INTERVAL_MS = 20000;
 //int counter = 1;
 
-static void smartDelay(unsigned long ms)
-{
-    unsigned long start = millis();
-    do
-    {
-        while (GPS.available())
-            tgps.encode(GPS.read());
-    } while (millis() - start < ms);
-}
+//static void smartDelay(unsigned long ms)
+//{
+//    unsigned long start = millis();
+//    do
+//    {
+//        while (GPS.available())
+//            tgps.encode(GPS.read());
+//    } while (millis() - start < ms);
+//}
 
 
 bool runSensor(void*) {
     // Encoding the GPS
-    smartDelay(10000);
+    //smartDelay(10000);
     //make sure there is at least one point generated
     //a max of 3 packets per transmission session
     byte seqID[6];
@@ -88,12 +88,12 @@ void setup() {
     Serial.println("MAMA-DUCK...READY!");
 
     pinMode(btnPin, INPUT);
-    GPS.begin(9600, SERIAL_8N1, 34, 12);   //17-TX 18-RX
 
+    //display = DuckDisplay::getInstance();
+    //display->setupDisplay(duck.getType(), devId);
     display.begin(SSD1306_SWITCHCAPVCC,SCREEN_ADDRESS);
     display.display();
     // initialize the timer. The timer thread runs separately from the main loop
-    // and will trigger sending a counter message.
     //timer.every(INTERVAL_MS, runSensor);
     runSensor(new void*);
 }
