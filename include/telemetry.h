@@ -87,17 +87,4 @@ String getGPSData(byte* seqid, int count, unsigned long timepoint) {
     return jsonstat;
 }
 
-std::time_t tmConvert_t(int YYYY, byte MM, byte DD, byte hh, byte mm, byte ss)
-{
-    std::tm tmSet{};
-    tmSet.tm_year = YYYY - 1900;
-    tmSet.tm_mon = MM - 1;
-    tmSet.tm_mday = DD;
-    tmSet.tm_hour = hh;
-    tmSet.tm_min = mm;
-    tmSet.tm_sec = ss;
-    std::time_t t = std::mktime(&tmSet);
-    return mktime(std::gmtime(&t));
-}
-
 #endif
