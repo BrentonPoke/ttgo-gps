@@ -9,7 +9,7 @@
 #include <ctime>
 #include <DuckGPS.h>
 
-std::string deviceId("MAMAGPS9");
+std::string deviceId("MAMAGPS6");
 DuckGPS tgps;
 
 // Getting GPS data

@@ -13,7 +13,6 @@ XPowersPMU PMU;
 #define Serial SERIAL_PORT_USBVIRTUAL
 #endif
 #define CDP_LOG_INFO
-#define ARDUINO_TBeam
 //GPS
 #define LORA_FREQ 915.0 // Frequency Range. Set for US Region 915.0Mhz
 #define LORA_TXPOWER 20 // Transmit Power
@@ -91,7 +90,7 @@ void setup() {
     duck.setDeviceId(devId);
     // initialize the serial component with the hardware supported baudrate
     duck.setupSerial(115200);
-    duck.setupRadio(LORA_FREQ, LORA_CS_PIN, LORA_RST_PIN, LORA_DIO0_PIN, LORA_DIO1_PIN, LORA_TXPOWER);
+    duck.setupRadio();
     Serial.println("MAMA-DUCK...READY!");
 
     pinMode(btnPin, INPUT);
