@@ -7,7 +7,6 @@
 #include <Wire.h>
 #include <Adafruit_SSD1306.h>
 
-
 XPowersPMU PMU;
 #ifdef SERIAL_PORT_USBVIRTUAL
 #define Serial SERIAL_PORT_USBVIRTUAL
@@ -69,11 +68,11 @@ bool runSensor(void*) {
         //Serial.println(sensorVal);
         //Send gps data
         duck.sendData(topics::location, sensorVal);
-        //counter++;
-        //sleep(1);
     }
     return true;
 }
+
+
 
 void setup() {
     Wire.begin(21, 22);
