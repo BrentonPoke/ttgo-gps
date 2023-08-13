@@ -14,7 +14,6 @@ std::time_t tmConvert_t(int YYYY, byte MM, byte DD, byte hh, byte mm, byte ss);
 
 // Getting GPS data
 String getGPSData(byte* seqid, int count, unsigned long timepoint) {
-    tgps.readData(10000);
     // Printing the GPS data
     Serial.println("--- GPS ---");
     Serial.print("Latitude  : ");

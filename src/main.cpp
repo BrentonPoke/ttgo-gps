@@ -45,8 +45,9 @@ const int INTERVAL_MS = 20000;
 bool runSensor(void*) {
     // Encoding the GPS
     //smartDelay(10000);
+    tgps.readData(10000);
     //make sure there is at least one point generated
-    //a max of 3 packets per transmission session
+    //a max of 4 packets per transmission session
     byte seqID[6];
     std::uniform_int_distribution<int> distribution(0,35);
     std::default_random_engine eng{esp_random()};
