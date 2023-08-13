@@ -9,7 +9,7 @@
 #include <ctime>
 
 
-std::string deviceId("MAMAGPS9");
+std::string deviceId("MAMAGPSB");
 
 TinyGPSPlus tgps;
 HardwareSerial GPS(1);
