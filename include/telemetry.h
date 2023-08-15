@@ -8,9 +8,8 @@
 #include <ctime>
 #include <DuckGPS.h>
 
-std::string deviceId("MAMAGPS9");
+std::string deviceId("MAMAGPSC");
 DuckGPS tgps;
-std::time_t tmConvert_t(int YYYY, byte MM, byte DD, byte hh, byte mm, byte ss);
 
 // Getting GPS data
 String getGPSData(byte* seqid, int count, unsigned long timepoint) {
@@ -70,6 +69,7 @@ String getGPSData(byte* seqid, int count, unsigned long timepoint) {
     display.println(" mV");
     display.print("Percentage: ");
     display.println(PMU.getBatteryPercent());
+    display.println("Uniform Distribution");
     display.display();
 
     /*
