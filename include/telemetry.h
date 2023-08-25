@@ -9,7 +9,7 @@
 #include <ctime>
 
 
-std::string deviceId("MAMAGPSB");
+std::string deviceId("MAMAGPSD");
 
 TinyGPSPlus tgps;
 HardwareSerial GPS(1);
@@ -83,6 +83,7 @@ String getGPSData(byte* seqid, int count, unsigned long timepoint) {
     display.println(" mV");
     display.print("Percentage: ");
     display.println(PMU.getBatteryPercent());
+    display.print("Exponential");
     display.display();
 
     /*
