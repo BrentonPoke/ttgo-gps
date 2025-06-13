@@ -3,13 +3,13 @@
 //
 #ifndef TELEMETRY_H
 #define TELEMETRY_H
-#include <coords.h>
+#include <random>
 #include <ArduinoJson.h>
 #include <ctime>
 #include <DuckGPS.h>
 
-std::string deviceId("MAMAGPSC");
-DuckGPS tgps;
+std::string deviceId("MAMAGPS3");
+DuckGPS tgps(34,12);
 
 // Getting GPS data
 String getGPSData(byte* seqid, int count, unsigned long timepoint) {

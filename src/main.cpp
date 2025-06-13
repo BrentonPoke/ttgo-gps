@@ -26,7 +26,7 @@ MamaDuck duck;
 //DuckDisplay* display = NULL;
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #include <telemetry.h>
-
+std::mt19937 gen;
 auto timer = timer_create_default();
 const int INTERVAL_MS = 20000;
 //int counter = 1;
@@ -84,7 +84,7 @@ void setup() {
     // Use the default setup provided by the SDK
     duck.setDeviceId(devId);
     // initialize the serial component with the hardware supported baudrate
-    duck.setupSerial(115200);
+    //duck.setupSerial(115200);
     duck.setupRadio();
     Serial.println("MAMA-DUCK...READY!");
 
@@ -96,12 +96,12 @@ void setup() {
     display.display();
     // initialize the timer. The timer thread runs separately from the main loop
     //timer.every(INTERVAL_MS, runSensor);
+    gen.seed(esp_random());
     runSensor(new void*);
 }
 
 void loop() {
     timer.tick();
-    std::mt19937 gen(millis());
     std::uniform_int_distribution<> distrib(1000, 300000);
         if (timer.empty())
             timer.in(distrib(gen), runSensor);
