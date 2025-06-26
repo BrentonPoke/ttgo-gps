@@ -14,7 +14,7 @@ HardwareSerial GPS(1);
 std::time_t tmConvert_t(int YYYY, byte MM, byte DD, byte hh, byte mm, byte ss);
 
 // Getting GPS data
-String getGPSData(std::pair<double,double> gpsPair, byte* seqid, int count) {
+String getGPSData(std::pair<double,double> gpsPair, std::array<uint8_t,6>& seqid, int count) {
 
     // Printing the GPS data
     Serial.println("--- GPS ---");
@@ -44,12 +44,12 @@ String getGPSData(std::pair<double,double> gpsPair, byte* seqid, int count) {
     //test of EMS ideas...
 
     std::string arr[3] = {"NB","M","W"};
-
+    std::string str(seqid.begin(), seqid.end());
     DynamicJsonDocument nestdoc(229);
     JsonObject ems  = nestdoc.createNestedObject("EMS");
     ems["G"] = arr[esp_random() % 3];
     ems["Device"] = deviceId;
-    ems["seqID"] = seqid;
+    ems["seqID"] = str;
     ems["seqNum"] = count;
     ems["GPS"]["lon"] = gpsPair.first;
     ems["GPS"]["lat"] = gpsPair.second;
