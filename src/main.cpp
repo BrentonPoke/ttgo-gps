@@ -50,10 +50,9 @@ bool runSensor(void*) {
     //a max of 4 packets per transmission session
     byte seqID[6];
     std::uniform_int_distribution<int> distribution(0,35);
-    std::default_random_engine eng{esp_random()};
     const char* digits = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     for (int i = 0; i < sizeof(seqID) ; i++) {
-        seqID[i] = digits[distribution(eng)];
+        seqID[i] = digits[distribution(gen)];
     }
     unsigned long timepoint = millis();
     for (int i = 0; i <= 3; i++) {
@@ -73,7 +72,7 @@ void setup() {
     // will get rejected
     Wire.begin(21, 22);
     WiFi.mode(WIFI_OFF);
-    std::vector<byte> devId;
+    std::vector<uint8_t> devId;
     devId.insert(devId.end(), deviceId.begin(), deviceId.end());
     bool result = PMU.begin(Wire, AXP192_SLAVE_ADDRESS, 21, 22);
 
@@ -97,7 +96,7 @@ void setup() {
     // initialize the timer. The timer thread runs separately from the main loop
     //timer.every(INTERVAL_MS, runSensor);
     gen.seed(esp_random());
-    runSensor(new void*);
+    runSensor(nullptr);
 }
 
 void loop() {
