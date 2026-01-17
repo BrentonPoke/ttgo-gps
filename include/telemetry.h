@@ -3,87 +3,109 @@
 //
 #ifndef TELEMETRY_H
 #define TELEMETRY_H
+//For random coordinate generation
+#include <iostream>
 #include <random>
+#include <utility>
+#include <cmath>
+
+#include <DuckGPS.h>
 #include <ArduinoJson.h>
 #include <ctime>
-#include <DuckGPS.h>
+#include <Adafruit_SSD1306.h>
+//#include <XPowersLib.h>
+#include <utils/DuckUtils.h>
+#define LOGO_HEIGHT   16
+#define LOGO_WIDTH    16
+#define OLED_RESET     -1
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+#define SCREEN_ADDRESS 0x3c
 
-std::string deviceId("MAMAGPS3");
-DuckGPS tgps(34,12);
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+std::string deviceId("MAMAGPSB");
+DuckGPS tgps;
+//XPowersPMU axp;
 
 // Getting GPS data
-String getGPSData(byte* seqid, int count, unsigned long timepoint) {
-    // Printing the GPS data
-    Serial.println("--- GPS ---");
-    Serial.print("Latitude  : ");
-    Serial.println(tgps.lat(), 5);
-    Serial.print("Longitude : ");
-    Serial.println(tgps.lng(), 4);
-    Serial.print("Altitude  : ");
-    Serial.print(tgps.altitude(DuckGPS::AltitudeUnit::meter));
-    Serial.println("M");
-    Serial.print("Satellites: ");
-    Serial.println(tgps.satellites());
-    Serial.print("Epoch     : ");
-    Serial.println(tgps.epoch());
-    Serial.print("Speed     : ");
-    Serial.println(tgps.speed(DuckGPS::SpeedUnit::kmph));
-    Serial.println("**********************");
+std::string getGPSData(std::pair<float,float> gpsPair, std::array<uint8_t,6>& seqid, int count) {
 
     //test of EMS ideas...
 
-    DynamicJsonDocument nestdoc(229);
-    JsonObject ems  = nestdoc.createNestedObject("EMS");
+    std::string arr[3] = {"NB","M","W"};
+    // not sure why I need to do this now
+
+    JsonDocument nestdoc;
+    JsonObject ems  = nestdoc["EMS"].to<JsonObject>();
+    ems["G"] = arr[esp_random() % 3];
     ems["Device"] = deviceId;
-    ems["seqID"] = seqid;
+    ems["seqID"] = duckutils::toString(seqid);
     ems["seqNum"] = count;
-    ems["MCUdelay"] = millis() - timepoint;
-    ems["GPS"]["lon"] = tgps.lat();
-    ems["GPS"]["lat"] =  tgps.lng();
-    ems["Voltage"] = PMU.getBattVoltage();
-    ems["level"] = PMU.getBatteryPercent();
+   // ems["Voltage"] = axp.getBattVoltage();
+   // ems["level"] = axp.getBatteryPercent();
+    ems["GPS"]["lon"] = gpsPair.first;
+    ems["GPS"]["lat"] = gpsPair.second;
     ems["GPS"]["satellites"] = tgps.satellites();
     ems["GPS"]["time"] = tgps.epoch();
-    ems["GPS"]["alt"] = tgps.altitude(DuckGPS::AltitudeUnit::kilo);
+    ems["GPS"]["alt"] = tgps.altitude(DuckGPS::AltitudeUnit::meter);
     ems["GPS"]["speed"] = tgps.speed(DuckGPS::SpeedUnit::kmph);
 
-    String jsonstat;
+    std::string jsonstat;
     serializeJson(ems,jsonstat);
 
-    Serial.println("Payload: " + jsonstat);
+    Serial.print("Payload: ");
+    Serial.println(jsonstat.c_str());
     Serial.print("Payload Size: ");
     Serial.println(jsonstat.length());
+
     display.clearDisplay();
-    display.setTextSize(1);
+    display.setTextSize(1); // Draw 2X-scale text
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(0, 0);
     display.println(deviceId.c_str());
     display.print("SeqID: ");
-    display.println(ems["seqID"].as<String>());
+    display.println(ems["seqID"].as<std::string>().c_str());
     display.print("Time: ");
-    display.println(ems["GPS"]["time"].as<time_t>());
-    display.println("Lat, Long: ");
-    display.printf("%f, %f", ems["GPS"]["lat"].as<double>(), ems["GPS"]["lon"].as<double>());
+    display.println(ems["GPS"]["time"].as<long>());
+    display.print("Satellites: ");
+    display.println(ems["GPS"]["satellites"].as<int>());
+    display.println("Coordidnates:");
+    display.print(ems["GPS"]["lat"].as<float>(), 6);
+    display.print(", ");
+    display.println(ems["GPS"]["lon"].as<float>(), 6);
     display.print("Voltage: ");
-    display.print(PMU.getBattVoltage());
-    display.println(" mV");
+   // display.println(axp.getBattVoltage());
     display.print("Percentage: ");
-    display.println(PMU.getBatteryPercent());
-    display.println("Uniform Distribution");
+   // display.println(axp.getBatteryPercent());
     display.display();
 
     /*
      char buff[229];
     unishox2_compress_simple(jsonstat.c_str(), int(jsonstat.length()), buff);
      */
-    // Creating a message of the Latitude and Longitude
-    // Check to see if GPS data is being received
-//    if (millis() > 5000 && tgps.charsProcessed() < 10)
-//    {
-//        Serial.println(F("No GPS data received: check wiring"));
-//    }
 
     return jsonstat;
 }
 
+std::pair<float, float> getLocation(float x0, float y0, int radius) {
+    std::random_device rd;
+    std::uniform_int_distribution<int> dist(0,49);
+    // Convert radius from meters to degrees
+    float radiusInDegrees = radius / 111000.0f;
+
+    float u = dist(rd);
+    float v = dist(rd);
+    float w = radiusInDegrees * sqrt(u);
+    float t = 2 * M_PI * v;
+    float x = w * cos(t);
+    float y = w * sin(t);
+
+    // Adjust the x-coordinate for the shrinking of the east-west distances
+    float new_x = x / cos(M_PI * y0);
+    float foundLongitude = new_x + x0;
+    float foundLatitude = y + y0;
+    //std::cout << "Longitude: " ;
+    return std::make_pair(foundLongitude, foundLatitude);
+}
 #endif
