@@ -13,7 +13,7 @@
 #define Serial SERIAL_PORT_USBVIRTUAL
 #endif
 const int btnPin = 37;
-MamaDuck duck(deviceId);
+MamaDuck<> duck(deviceId);
 
 std::mt19937 gen;
 
@@ -70,7 +70,6 @@ void setup() {
 
 void loop() {
     timer.tick();
-    std::mt19937 gen(millis());
     std::exponential_distribution<double> distrib(2.5);
         if (timer.empty())
             timer.in(distrib(gen)*400000, runSensor);
