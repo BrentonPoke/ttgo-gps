@@ -13,7 +13,7 @@
 #define Serial SERIAL_PORT_USBVIRTUAL
 #endif
 const int btnPin = 37;
-MamaDuck duck(deviceId);
+MamaDuck<> duck(deviceId);
 
 std::mt19937 gen;
 
