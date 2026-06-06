@@ -8,11 +8,9 @@
 #include <random>
 #include <utility>
 #include <cmath>
-
 #include <DuckGPS.h>
 #include <ArduinoJson.h>
 #include <ctime>
-#include <Adafruit_SSD1306.h>
 //#include <XPowersLib.h>
 #include <utils/DuckUtils.h>
 #define LOGO_HEIGHT   16
@@ -22,7 +20,9 @@
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 #define SCREEN_ADDRESS 0x3c
 
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+#define SDA_PIN 21 //4 heltec v2
+#define SLC_PIN 22 //15 heltec v2
+AdafruitDisplay driver(SCREEN_WIDTH, SCREEN_HEIGHT, OLED_RESET);
 
 std::string deviceId("MAMAGPSB");
 DuckGPS tgps;
@@ -59,26 +59,26 @@ std::string getGPSData(std::pair<float,float> gpsPair, std::array<uint8_t,6>& se
     Serial.print("Payload Size: ");
     Serial.println(jsonstat.length());
 
-    display.clearDisplay();
-    display.setTextSize(1); // Draw 2X-scale text
-    display.setTextColor(SSD1306_WHITE);
-    display.setCursor(0, 0);
-    display.println(deviceId.c_str());
-    display.print("SeqID: ");
-    display.println(ems["seqID"].as<std::string>().c_str());
-    display.print("Time: ");
-    display.println(ems["GPS"]["time"].as<long>());
-    display.print("Satellites: ");
-    display.println(ems["GPS"]["satellites"].as<int>());
-    display.println("Coordidnates:");
-    display.print(ems["GPS"]["lat"].as<float>(), 6);
-    display.print(", ");
-    display.println(ems["GPS"]["lon"].as<float>(), 6);
-    display.print("Voltage: ");
+    driver.display.clearDisplay();
+    driver.display.setTextSize(1); // Draw 2X-scale text
+    driver.display.setTextColor(SSD1306_WHITE);
+    driver.display.setCursor(0, 0);
+    driver.display.println(deviceId.c_str());
+    driver.display.print("SeqID: ");
+    driver.display.println(ems["seqID"].as<std::string>().c_str());
+    driver.display.print("Time: ");
+    driver.display.println(ems["GPS"]["time"].as<long>());
+    driver.display.print("Satellites: ");
+    driver.display.println(ems["GPS"]["satellites"].as<int>());
+    driver.display.println("Coordidnates:");
+    driver.display.print(ems["GPS"]["lat"].as<float>(), 6);
+    driver.display.print(", ");
+    driver.display.println(ems["GPS"]["lon"].as<float>(), 6);
+    driver.display.print("Voltage: ");
    // display.println(axp.getBattVoltage());
-    display.print("Percentage: ");
+    driver.display.print("Percentage: ");
    // display.println(axp.getBatteryPercent());
-    display.display();
+    driver.display.display();
 
     /*
      char buff[229];

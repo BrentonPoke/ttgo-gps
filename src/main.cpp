@@ -7,6 +7,8 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <random>
+#include "AdafruitDisplay.h"
+#include "logo.h"
 #include <telemetry.h>
 
 #ifdef SERIAL_PORT_USBVIRTUAL
@@ -22,7 +24,7 @@ const int INTERVAL_MS = 20000;
 
 bool runSensor(void*) {
     // Encoding the GPS
-    tgps.readData(10000);
+    tgps.readData(5000);
     //make sure there is at least one point generated
     std::pair<float,float> gpsPair = getLocation(tgps.lng(),tgps.lat(),15);
     //a max of 3 packets per transmission session
@@ -59,8 +61,12 @@ void setup() {
 
     pinMode(btnPin, INPUT);
 
-    display.begin(SSD1306_SWITCHCAPVCC,SCREEN_ADDRESS);
-    display.display();
+    driver.setLogo(LOGO);
+    delay(750);
+    driver.launch();
+    driver.showLogo(AdafruitDisplay::BITMAP);
+    delay(3000);
+
     tgps.setup();
     gen.seed(analogRead(0));
     duck.setupWithDefaults();
