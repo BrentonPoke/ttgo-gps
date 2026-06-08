@@ -75,15 +75,18 @@ void setup() {
 }
 
 void loop() {
-    timer.tick();
+    //timer.tick();
 
     std::uniform_int_distribution<> distrib(1000, 300000);
-//    auto now = duckutils::Timer::now();
-//    auto time = now + std::chrono::milliseconds(distrib(gen));
-//    std::cout << "Next sensor read in " << std::chrono::duration_cast<std::chrono::seconds>(time - now).count() << " seconds." << std::endl;
-//    duckutils::Timer(time,runSensor, nullptr);
+    auto now = std::chrono::steady_clock::now();
+    auto time = now + std::chrono::milliseconds(distrib(gen));
+    auto then = std::chrono::duration_cast<std::chrono::seconds>(time - now);
+    std::cout << "Next sensor read in " << then.count() << " seconds." << std::endl;
+    std::chrono::milliseconds timepoint(then);
 
-    if (timer.empty()) timer.in(distrib(gen), runSensor);
+    duckutils::Timer(timepoint.count(),false,runSensor, nullptr);
+
+    //if (timer.empty()) timer.in(distrib(gen), runSensor);
     // Use the default run(). The Mama duck is designed to also forward data it receives
     // from other ducks, across the network. It has a basic routing mechanism built-in
     // to prevent messages from hoping endlessly.

@@ -54,10 +54,8 @@ std::string getGPSData(std::pair<float,float> gpsPair, std::array<uint8_t,6>& se
     std::string jsonstat;
     serializeJson(ems,jsonstat);
 
-    Serial.print("Payload: ");
-    Serial.println(jsonstat.c_str());
-    Serial.print("Payload Size: ");
-    Serial.println(jsonstat.length());
+    logdbg_ln("Payload: %s",jsonstat);
+    logdbg_ln("Payload Size: %i",jsonstat.length());
 
     driver.display.clearDisplay();
     driver.display.setTextSize(1); // Draw 2X-scale text
