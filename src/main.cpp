@@ -32,16 +32,14 @@ bool runSensor(void*) {
     std::array<uint8_t,6> seqID;
     std::uniform_int_distribution<int> distribution(0,35);
     std::string digits = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    for (int i = 0; i < seqID.size() ; i++) {
+    for (size_t i = 0; i < seqID.size() ; i++) {
         seqID[i] = digits[distribution(gen)];
     }
     //make sure at least one packet is sent
     for (int i = 0; i <= 3; i++) {
         std::string sensorVal = getGPSData(gpsPair, seqID, i);
-        //Serial.println(sensorVal);
         //Send gps data
         duck.sendData(topics::gps, sensorVal);
-        //counter++;
         delay(1000);
     }
 
@@ -57,7 +55,7 @@ void setup() {
     // Use the default setup provided by the SDK
 
 
-    Serial.println("MAMA-DUCK...READY!");
+    loginfo_ln("MAMA-DUCK...READY!");
 
     pinMode(btnPin, INPUT);
 
