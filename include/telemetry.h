@@ -10,23 +10,31 @@
 #include <cmath>
 #include <DuckGPS.h>
 #include <ArduinoJson.h>
-#include <ctime>
-//#include <XPowersLib.h>
+#include <XPowersLib.h>
 #include <utils/DuckUtils.h>
-#define LOGO_HEIGHT   16
-#define LOGO_WIDTH    16
-#define OLED_RESET     -1
+
+
+#define CDPCFG_PIN_OLED_DATA 21
+#define CDPCFG_PIN_OLED_CLOCK 22
+#define CDPCFG_PIN_OLED_RESET 16
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 #define SCREEN_ADDRESS 0x3c
 
 #define SDA_PIN 21 //4 heltec v2
 #define SLC_PIN 22 //15 heltec v2
-AdafruitDisplay driver(SCREEN_WIDTH, SCREEN_HEIGHT, OLED_RESET);
+AdafruitDisplay driver(
+ SCREEN_WIDTH,
+ SCREEN_HEIGHT,
+ CDPCFG_PIN_OLED_DATA,
+ CDPCFG_PIN_OLED_CLOCK,
+ SCREEN_ADDRESS,
+ CDPCFG_PIN_OLED_RESET,
+ DuckType::MAMA);
 
 std::string deviceId("MAMAGPSB");
-DuckGPS tgps;
-//XPowersPMU axp;
+DuckGPS tgps(CDPCFG_GPS_RX, CDPCFG_GPS_TX);
+XPowersPMU axp;
 
 // Getting GPS data
 std::string getGPSData(std::pair<float,float> gpsPair, std::array<uint8_t,6>& seqid, int count) {
@@ -73,9 +81,9 @@ std::string getGPSData(std::pair<float,float> gpsPair, std::array<uint8_t,6>& se
     driver.display.print(", ");
     driver.display.println(ems["GPS"]["lon"].as<float>(), 6);
     driver.display.print("Voltage: ");
-   // display.println(axp.getBattVoltage());
+    driver.display.println(axp.getBattVoltage());
     driver.display.print("Percentage: ");
-   // display.println(axp.getBatteryPercent());
+    driver.display.println(axp.getBatteryPercent());
     driver.display.display();
 
     /*

@@ -22,9 +22,12 @@ std::mt19937 gen;
 auto timer = timer_create_default();
 const int INTERVAL_MS = 20000;
 
+bool runsleep(nullptr_t);
+
 bool runSensor(void*) {
+    driver.wake();
     // Encoding the GPS
-    tgps.readData(5000);
+    tgps.readData(10000);
     //make sure there is at least one point generated
     std::pair<float,float> gpsPair = getLocation(tgps.lng(),tgps.lat(),15);
     //a max of 3 packets per transmission session
@@ -42,7 +45,6 @@ bool runSensor(void*) {
         duck.sendData(topics::gps, sensorVal);
         delay(1000);
     }
-
     return true;
 }
 
@@ -73,18 +75,26 @@ void setup() {
 }
 
 void loop() {
-    //timer.tick();
+    timer.tick();
 
     std::uniform_int_distribution<> distrib(1000, 300000);
-    auto now = std::chrono::steady_clock::now();
-    auto time = now + std::chrono::milliseconds(distrib(gen));
-    auto then = std::chrono::duration_cast<std::chrono::seconds>(time - now);
-    std::cout << "Next sensor read in " << then.count() << " seconds." << std::endl;
-    std::chrono::milliseconds timepoint(then);
+    // auto now = std::chrono::steady_clock::now();
+    // auto time = now + std::chrono::milliseconds(distrib(gen));
+    // auto then = std::chrono::duration_cast<std::chrono::seconds>(time - now);
+    // std::cout << "Next sensor read in " << then.count() << " seconds." << std::endl;
+    // std::chrono::milliseconds timepoint(then);
 
-    duckutils::Timer(timepoint.count(),false,runSensor, nullptr);
+    //duckutils::Timer(timepoint.count(),false,runSensor, nullptr);
 
-    //if (timer.empty()) timer.in(distrib(gen), runSensor);
+    if (timer.size() < 2) {
+        long delay = distrib(gen);
+        loginfo_ln("Next sensor read in %ld seconds.", delay/1000);
+        timer.in(delay, runSensor);
+        timer.in(30000,[](void*) {
+        driver.sleep();
+        return false;
+    });
+    }
     // Use the default run(). The Mama duck is designed to also forward data it receives
     // from other ducks, across the network. It has a basic routing mechanism built-in
     // to prevent messages from hoping endlessly.
