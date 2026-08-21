@@ -32,7 +32,7 @@ AdafruitDisplay driver(
  CDPCFG_PIN_OLED_RESET,
  DuckType::MAMA);
 
-std::string deviceId("MAMAGPSB");
+std::string deviceId("MAMAGPSC");
 DuckGPS tgps(CDPCFG_GPS_RX, CDPCFG_GPS_TX);
 XPowersPMU axp;
 
